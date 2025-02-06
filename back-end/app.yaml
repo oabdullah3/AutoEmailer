@@ -1,0 +1,4 @@
+env_variables:
+  MONGODB_USERNAME : "full-stack-react-server"
+  MONGODB_PASSWORD : "Yq0Gbaljg5adEnEz"
+runtime: nodejs22
