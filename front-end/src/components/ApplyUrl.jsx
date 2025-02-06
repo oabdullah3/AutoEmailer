@@ -7,8 +7,10 @@ function ApplyUrl(){
     const [url, setUrl] = useState('');
     const [institutionName, setInstitutionName] = useState('');
     const [personName, setPersonName] = useState('');
+    const [Major, setMajor] = useState('');
+    const [relevantExperience, setrelevantExperience] = useState('');
     const [purpose, setPurpose] = useState('');
-    const [skills, setSkills] = useState('');
+    const [details, setDetails] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [data, setData] = useState(null);
     const navigate = useNavigate();
@@ -30,7 +32,9 @@ function ApplyUrl(){
                 purpose: purpose,
                 institutionName: institutionName,
                 personName: personName,
-                skills: skills,
+                details: details,
+                major:Major,
+                relevantExperience:relevantExperience
             };
             setIsLoading(true);
             const res = await axios.post('http://localhost:8000/api/url-data', { url, jobDetails });
@@ -64,29 +68,45 @@ function ApplyUrl(){
                     <h2>Your Personal Details (Used for generating emails)</h2>
                     <input
                         type="text"
-                        placeholder="Email Purpose"
-                        value={purpose}
-                        onChange={(e) => setPurpose(e.target.value)}
+                        placeholder="Your Name"
+                        value={personName}
+                        onChange={(e) => setPersonName(e.target.value)}
                         required
                     />
                     <input
                         type="text"
-                        placeholder="Institution Name"
+                        placeholder="Email Purpose such as Job Application/Internship Application"
+                        value={purpose}
+                        onChange={(e) => setPurpose(e.target.value)}
+                        required
+                    />
+                   
+                    <input
+                        type="text"
+                        placeholder="Your Current Institution Name"
                         value={institutionName}
                         onChange={(e) => setInstitutionName(e.target.value)}
                         required
                     />
                     <input
                         type="text"
-                        placeholder="Person's Name"
-                        value={personName}
-                        onChange={(e) => setPersonName(e.target.value)}
+                        placeholder="Your Major"
+                        value={Major}
+                        onChange={(e) => setMajor(e.target.value)}
                         required
                     />
+                    <input
+                        type="text"
+                        placeholder="Relevant Experience"
+                        value={relevantExperience}
+                        onChange={(e) => setrelevantExperience(e.target.value)}
+                        required
+                    />
+                 
                     <textarea
-                        placeholder="Skills (comma-separated)"
-                        value={skills}
-                        onChange={(e) => setSkills(e.target.value)}
+                        placeholder="Give a brief description of your skills and experience. also give details about you like your major interests etc."
+                        value={details}
+                        onChange={(e) => setDetails(e.target.value)}
                         required
                     />
                     <button type="submit">Apply</button>

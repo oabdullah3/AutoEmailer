@@ -37,7 +37,8 @@ app.post('/api/url-data', async function(req,res){
     extractedEmails = extractedEmails.filter(email => !emailsToRemove.includes(email));
     console.log("EXTRACTED EMAIL", extractedEmails);
 
-    const emailText = await generateEmail(req.body.jobDetails);
+    let emailText = await generateEmail(req.body.jobDetails);
+
     console.log("EMAIL TEXT", emailText);
     const returnData = {emailText : emailText, extractedEmails: extractedEmails};
 

@@ -51,12 +51,31 @@ export const extractEmail = async (text) => {
 
 export const generateEmail = async (details) => {
 
-    const template = "Dear Hiring Manager,I hope this email finds you well. I am writing to express my interest in the ITC STEM Internship at Edutopia for the upcoming summer. With my passion for technology and my academic background in STEM, I believe I would be a valuable addition to your team. My name Mahad, and I am currently a First-year student majoring in Computer Science at City University Of Hong Kong. I have a solid foundation in various programming languages, including Python, JavaScript, and C++. I also have a strong foundation in web development including HTML, CSS and JavaScript.I have attached my resume, which provides further details regarding my qualifications, academic achievements, and relevant experiences. I would be grateful for the opportunity to discuss how I can contribute to the success of Edutopia during an interview.Thank you for considering my application for the ITC STEM Internship at Edutopia. I look forward to the possibility of contributing to your organization and gaining invaluable industry experience. Should you require any additional information or have any questions, please do not hesitate to contact me.Thank you for your time and consideration.Sincerely,MAHAD."
-    
-    const prompt = `Here is a sample email. use the details given to you about me and write me a similar email. dont give me placeholders for name etc. write it yourself. i will be sending this email directly. if you dont have anything then dont include it. the given mail is just a template. if you dont have job position/name/company name dont write it. following is the template ${template}. the following is users institution name ${details.institutionName}, the following is users name ${details.personName}, the following is users skills ${details.skills}`;
+    const emailTemplate = `
+    Dear Hiring Manager,
+
+    I hope this email finds you well. I am writing to express my interest in the job position at your company. With my passion for {field} and my academic background, I believe I would be a valuable addition to your team.
+
+    My name is {name}, and I am currently a {year} student majoring in {major} at {institution}. I have developed skills in {skills}, which have prepared me for this role. I also have experience in {relevantExperience}.
+
+    I have attached my resume, which provides further details regarding my qualifications, academic achievements, and relevant experiences. I would be grateful for the opportunity to discuss how I can contribute to your organization during an interview.
+
+    Thank you for considering my application. I look forward to the possibility of contributing to your team and gaining invaluable industry experience. Should you require any additional information or have any questions, please do not hesitate to contact me.
+
+    Thank you for your time and consideration.
+
+    Sincerely,
+    {name}
+    `;
+
+    const prompt = `Here is a sample email template: ${emailTemplate}. Please use the details provided about me to create a similar email without including placeholders for names, job positions, or company names. If any information is missing, do not add it to the email. The user's institution name is ${details.institutionName}, the user's name is ${details.personName}, the user's major is ${details.major}, the user's skills include ${details.details}, and the relevant experience is ${details.relevantExperience}. Provide an json object containing two keys: subject and emailContent, formatted like this: { subject: 'subject', emailContent: 'emailContent' }.. Thank you!`;
 
     const emailtosend = await chatBot(prompt);
     console.log(emailtosend);
-    const cleanedText = emailtosend.content.replace(/<think>.*?<\/think>/s, '').trim();
-    return cleanedText;
+    let cleanedText0 = emailtosend.content.replace(/<think>.*?<\/think>/s, '').trim();
+    let cleanedText1 = cleanedText0.replace("```json", '').trim();
+    let cleanedText2 = cleanedText1.replace("```", '').trim();
+    console.log(cleanedText2);
+
+    return cleanedText2
 }

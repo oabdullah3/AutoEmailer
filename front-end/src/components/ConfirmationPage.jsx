@@ -5,7 +5,8 @@ function ConfirmationPage(){
     return (
         <div>
             <h1>Confirmation Page</h1>
-            <p>{location.state?.data.emailText}</p>
+            <p>{location.state?.data.emailText.subject}</p>
+            <p>{location.state?.data.emailText.emailContent}</p>
             <ul>{location.state?.data.extractedEmails.map((email) =>{
                 return <li key={email}>{email}</li>;
             })}
