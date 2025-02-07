@@ -4,6 +4,7 @@ import path from 'path';
 import cors from 'cors';
 import {generateEmail, extractEmail, chatBot, scrapeWebsite } from './HelperFunctions.js';
 
+import session from 'express-session';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -19,6 +20,8 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
+// Set up session middleware
+app.use(session({ secret: 'your-secret-key', resave: false, saveUninitialized: true }));
 
 
 app.post('/api/url-data', async function(req,res){
@@ -36,10 +39,13 @@ app.post('/api/url-data', async function(req,res){
     // Remove specified emails directly from the extractedEmail array
     extractedEmails = extractedEmails.filter(email => !emailsToRemove.includes(email));
     console.log("EXTRACTED EMAIL", extractedEmails);
+    req.session.extractedEmails = extractedEmails; // Store in session for email sending
 
     let emailText = await generateEmail(req.body.jobDetails);
+    emailText = JSON.parse(emailText);
 
     console.log("EMAIL TEXT", emailText);
+    req.session.email = emailText.emailContent; // Store in session for email sending
     const returnData = {emailText : emailText, extractedEmails: extractedEmails};
 
     // // Store extracted emails in session

@@ -10,7 +10,6 @@ import NotFound from './components/NotFound';
 
 
 const routes = [{
-  element: <Layout />,
   errorElement: <NotFound />,
   children: [{
     path: '/',

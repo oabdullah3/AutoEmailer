@@ -1,0 +1,9 @@
+{
+  "dependencies": {
+    "express-session": "^1.18.1",
+    "google": "^2.1.0",
+    "googleapis": "^144.0.0",
+    "Router": "^2.1.0",
+    "session": "^0.1.0"
+  }
+}
