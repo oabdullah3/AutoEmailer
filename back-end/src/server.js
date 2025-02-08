@@ -7,7 +7,8 @@ import fs from 'fs';
 import {generateEmail, extractEmail, chatBot, scrapeWebsite } from './HelperFunctions.js';
 import multer from 'multer';
 
-// const __filename = fileURLToPath(import.meta.url);
+// import session from 'express-session';
+const __filename = fileURLToPath(import.meta.url);
 // const __dirname = path.dirname(__filename);
 
 
@@ -15,24 +16,33 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
+// Set up session middleware
+app.use(session({ secret: 'your-secret-key', resave: false, saveUninitialized: true }));
+
+
 app.post('/api/url-data', async function(req,res){
-    try{
-        console.log("URL", req.body.url);
-        const scrappedData = await scrapeWebsite(req.body.url);    
-        
-        const prompt = "Here is some scraped website data. Please extract the contact email address and return it in an array format. If no email address is found, return an empty array. I don't want to know what you are thinking, just give me the email in an array and no other words. Example output: [mahadjawed4@gmail.com] Thank you!\n\n " + scrappedData; 
-        const chatData = await chatBot(prompt);
-        console.log("CHAT DATA", chatData);
+    console.log("URL", req.body.url);
+    const scrappedData = await scrapeWebsite(req.body.url);    
+    const prompt = "Here is some scraped website data. Please extract the contact email address and return it in an array format. If no email address is found, return an empty array. I don't want to know what you are thinking, just give me the email in an array and no other words. Example output: [mahadjawed4@gmail.com] Thank you!\n\n " + scrappedData;
+    const chatData = await chatBot(prompt);
+    console.log("CHAT DATA", chatData);
+    //const extractedEmail = extractEmail(chatData.content || ''); // Fallback to empty string if content is undefined
+    let extractedEmails = await extractEmail(chatData.content || ''); // Fallback to empty string if content is undefined
+    //Emails to remove
+    const emailsToRemove = ['name@domain.com', 'mahadjawed4@gmail.com'];
+    //Remove duplicates
+    extractedEmails = [...new Set(extractedEmails)];
+    // Remove specified emails directly from the extractedEmail array
+    extractedEmails = extractedEmails.filter(email => !emailsToRemove.includes(email));
+    console.log("EXTRACTED EMAIL", extractedEmails);
+    req.session.extractedEmails = extractedEmails; // Store in session for email sending
 
-        let extractedEmails = await extractEmail(chatData.content || '');
-        const emailsToRemove = ['name@domain.com', 'mahadjawed4@gmail.com'];
-        extractedEmails = [...new Set(extractedEmails)];
-        extractedEmails = extractedEmails.filter(email => !emailsToRemove.includes(email));
-        console.log("EXTRACTED EMAIL", extractedEmails);
+    let emailText = await generateEmail(req.body.jobDetails);
+    emailText = JSON.parse(emailText);
 
-        const emailText = await generateEmail(req.body.jobDetails);
-        console.log("EMAIL TEXT", emailText);
-        const returnData = {emailText : emailText, extractedEmails: extractedEmails};
+    console.log("EMAIL TEXT", emailText);
+    req.session.email = emailText.emailContent; // Store in session for email sending
+    const returnData = {emailText : emailText, extractedEmails: extractedEmails};
 
         res.status(200).json({ message: "Emails extracted and email text generated successfully", data: returnData});
 
