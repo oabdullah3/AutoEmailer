@@ -2,52 +2,152 @@ import express from 'express';
 import { fileURLToPath } from 'url';
 import path from 'path';
 import cors from 'cors';
+import xlsx from 'xlsx';
+import fs from 'fs';
 import {generateEmail, extractEmail, chatBot, scrapeWebsite } from './HelperFunctions.js';
+import multer from 'multer';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+// const __filename = fileURLToPath(import.meta.url);
+// const __dirname = path.dirname(__filename);
 
-// const credentials = JSON.parse(
-//     fs.readFileSync('./credentials.json')
-// );
-
-// admin.initializeApp({
-//   credential: admin.credential.cert(credentials)
-// });
 
 const app = express();
 app.use(express.json());
 app.use(cors());
 
-
-
 app.post('/api/url-data', async function(req,res){
-    console.log("URL", req.body.url);
-    const scrappedData = await scrapeWebsite(req.body.url);    
-    const prompt = "Here is some scraped website data. Please extract the contact email address and return it in an array format. If no email address is found, return an empty array. I don't want to know what you are thinking, just give me the email in an array and no other words. Example output: [mahadjawed4@gmail.com] Thank you!\n\n " + scrappedData;
-    const chatData = await chatBot(prompt);
-    console.log("CHAT DATA", chatData);
-    //const extractedEmail = extractEmail(chatData.content || ''); // Fallback to empty string if content is undefined
-    let extractedEmails = await extractEmail(chatData.content || ''); // Fallback to empty string if content is undefined
-    //Emails to remove
-    const emailsToRemove = ['name@domain.com', 'mahadjawed4@gmail.com'];
-    //Remove duplicates
-    extractedEmails = [...new Set(extractedEmails)];
-    // Remove specified emails directly from the extractedEmail array
-    extractedEmails = extractedEmails.filter(email => !emailsToRemove.includes(email));
-    console.log("EXTRACTED EMAIL", extractedEmails);
+    try{
+        console.log("URL", req.body.url);
+        const scrappedData = await scrapeWebsite(req.body.url);    
+        
+        const prompt = "Here is some scraped website data. Please extract the contact email address and return it in an array format. If no email address is found, return an empty array. I don't want to know what you are thinking, just give me the email in an array and no other words. Example output: [mahadjawed4@gmail.com] Thank you!\n\n " + scrappedData; 
+        const chatData = await chatBot(prompt);
+        console.log("CHAT DATA", chatData);
 
-    const emailText = await generateEmail(req.body.jobDetails);
-    console.log("EMAIL TEXT", emailText);
-    const returnData = {emailText : emailText, extractedEmails: extractedEmails};
+        let extractedEmails = await extractEmail(chatData.content || '');
+        const emailsToRemove = ['name@domain.com', 'mahadjawed4@gmail.com'];
+        extractedEmails = [...new Set(extractedEmails)];
+        extractedEmails = extractedEmails.filter(email => !emailsToRemove.includes(email));
+        console.log("EXTRACTED EMAIL", extractedEmails);
 
-    // // Store extracted emails in session
-    // req.session.extractedEmails = ["mahadjawed4@gmail.com"]; // Store in session for email sending
-    // req.session.jobDetails = requestData.jobDetails; // Save the session 
-    res.status(200).json({ message: "Emails extracted and email text generated successfully", data: returnData});
+        const emailText = await generateEmail(req.body.jobDetails);
+        console.log("EMAIL TEXT", emailText);
+        const returnData = {emailText : emailText, extractedEmails: extractedEmails};
+
+        res.status(200).json({ message: "Emails extracted and email text generated successfully", data: returnData});
+
+    } catch (error){
+        res.status(500).send('Error reading the uploaded file.');
+    }
 });
 
+// import multer from 'multer';
+// const upload = multer(); // Use memory storage for simplicity
+// // Ensure uploads directory exists
+// const uploadsDir = path.join(__dirname, 'uploads');
+// if (!fs.existsSync(uploadsDir)) {
+//     fs.mkdirSync(uploadsDir);
+// }
+
+// app.post('/api/excel-data', upload.single('file'),async function(req,res){
+
+//     console.log("Uploaded File:", req.file);
+//     const jobDetails = JSON.parse(req.body.json);
+//     console.log("JSON Data:", jobDetails);
+//     // const jobDetails = req.body.json.jobDetails;
+
+//     if (!req.file) {
+//         return res.status(400).send('No file uploaded.');
+//     }
+
+//     const filePath = path.join(uploadsDir, req.file.filename);
+//     try {
+//         const workbook = xlsx.readFile(filePath);
+//         const sheetName = workbook.SheetNames[0];
+//         const worksheet = workbook.Sheets[sheetName];
+//         const data = xlsx.utils.sheet_to_json(worksheet);
+
+//         const prompt = "Here is some scraped website data. Please extract the contact email address and return it in an array format. If no email address is found, return an empty array. I don't want to know what you are thinking, just give me the email in an array and no other words. Example output: [mahadjawed4@gmail.com] Thank you!\n\n sohahashmi68@gmail.com" + JSON.stringify(data);
+//         const chatData = await chatBot(prompt);
+        
+//         let extractedEmails = await extractEmail(chatData.content || '');
+//         const emailsToRemove = ['name@domain.com', 'mahadjawed4@gmail.com'];
+//         extractedEmails = [...new Set(extractedEmails)];
+//         extractedEmails = extractedEmails.filter(email => !emailsToRemove.includes(email));
+//         console.log("EXTRACTED EMAIL", extractedEmails);
+
+//         const emailText = await generateEmail(jobDetails);
+//         console.log("EMAIL TEXT", emailText);
+//         const returnData = {emailText : emailText, extractedEmails: extractedEmails};
+
+//         res.status(200).json({ message: "Emails extracted and email text generated successfully", data: returnData});
+
+//     } catch (error) {
+//         console.error('Error reading Excel file:', error);
+//         res.status(500).send('Error reading the uploaded file.');
+//     }    
+// });
+
 const PORT = process.env.PORT || 8000;
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
+// Ensure uploads directory exists
+const uploadsDir = path.join(__dirname, 'uploads');
+if (!fs.existsSync(uploadsDir)) {
+    fs.mkdirSync(uploadsDir);
+}
+
+// Set up storage for multer
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, uploadsDir); // Directory where files will be saved
+    },
+    filename: (req, file, cb) => {
+        cb(null, file.originalname);
+    }
+});
+const upload = multer({ storage: storage });
+
+
+app.post('/api/excel-data', upload.single('file'), async (req, res) => {
+    if (!req.file) {
+        return res.status(400).send('No file uploaded.');
+    }
+
+    const filePath = path.join(uploadsDir, req.file.filename);
+    try {
+        const workbook = xlsx.readFile(filePath);
+        const sheetName = workbook.SheetNames[0];
+        const worksheet = workbook.Sheets[sheetName];
+        const data = xlsx.utils.sheet_to_json(worksheet);
+
+        // Parse the jobDetails from the request body
+        const jobDetails = JSON.parse(req.body.json);
+
+        const prompt = "Here is some scraped website data. Please extract the contact email address and return it in an array format. If no email address is found, return an empty array. I don't want to know what you are thinking, just give me the email in an array and no other words. Example output: [mahadjawed4@gmail.com] Thank you!\n\n " + JSON.stringify(data);
+        const chatData = await chatBot(prompt); // Call your chatCompletion function
+        
+        console.log("CHAT DATA", chatData);
+        let extractedEmails = await extractEmail(chatData.content || '');
+        const emailsToRemove = ['name@domain.com', 'mahadjawed4@gmail.com'];
+        extractedEmails = [...new Set(extractedEmails)];
+        extractedEmails = extractedEmails.filter(email => !emailsToRemove.includes(email));
+        console.log("EXTRACTED EMAIL", extractedEmails);
+
+        // Pass the parsed jobDetails to generateEmail
+        const emailText = await generateEmail(jobDetails);
+        console.log("EMAIL TEXT", emailText);
+        const returnData = { emailText: emailText, extractedEmails: extractedEmails };
+
+        res.status(200).json({ message: "Emails extracted and email text generated successfully", data: returnData });
+        
+    } catch (error) {
+        console.error('Error reading Excel file:', error);
+        res.status(500).send('Error reading the uploaded file.');
+    }
+});
+
 
 async function start(){
     app.listen(PORT, function(){
@@ -57,86 +157,3 @@ async function start(){
 
 start();
 
-// let db;
-
-// async function connectToDB(){
-//     const uri = process.env.MONGODB_USERNAME
-//     ? `mongodb+srv://${process.env.MONGODB_USERNAME}:${process.env.MONGODB_PASSWORD}@cluster0.um8hq.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`
-//     :'mongodb://127.0.0.1:27017';
-//     const client = new MongoClient(uri, {
-//         serverApi:{
-//             version:ServerApiVersion.v1,
-//             strict:true,
-//             deprecationErrors:true
-//         }
-//     });
-//     await client.connect();
-//     db = client.db('full-stack-react-db');
-// }
-
-
-// app.use(async function(req,res,next){
-//     const {authtoken} = req.headers;
-//     if (authtoken){
-//         const user = await admin.auth().verifyIdToken(authtoken);
-//         req.user = user;
-//         next();
-//     }
-//     else{
-//         res.sendStatus(400);
-//     }
-// });
-
-// app.post('/api/articles/:name/upvote', async function(req,res){
-//     const name = req.params.name;
-//     const {uid} = req.user;
-
-//     const article = await db.collection('articles').findOne({articleName:name});
-//     const upvoteIds = article.upvoteIds || [];
-//     const canUpvote = uid && !upvoteIds.includes(uid);
-
-//     if(canUpvote){
-//         const updatedArticle = await db.collection('articles').findOneAndUpdate(
-//             {articleName:name},
-//             {
-//                 $inc:{upvotes:1},
-//                 $push:{upvoteIds:uid}
-//             },
-//             {returnDocument:'after'}
-//         );
-//         res.status(200).json(updatedArticle);
-//     }else{
-//         res.sendStatus(403);
-//     }
-// });
-
-// app.post('/api/articles/:name/comments',async function(req,res){
-//     const name = req.params.name;
-//     const {uid} = req.user;
-//     if (uid){
-//         const updatedArticle = await db.collection('articles').findOneAndUpdate(
-//             {articleName:name},
-//             {$push:{comments:req.body}},
-//             {returnDocument:'after'}
-//         );
-//         res.json(updatedArticle);
-//     } else {
-//         res.sendStatus(403);
-//     }
-// });
-
-
-
-// app.get('/hello', function(req,res) {
-//     res.send('Hello from GET!');
-// });
-
-// app.get('/hello/:name', function(req,res) {
-//     const {name} = req.params;
-//     res.send('Hello from '+ name + ' GET!');
-// });
-
-// app.post('/hello', function(req,res) {
-//     const {name} = req.body;
-//     res.send('Hello from '+ name + ' POST!');
-// });

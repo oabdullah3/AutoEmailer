@@ -46,7 +46,7 @@ function ApplyUrl(){
 
     return (
         <div>
-            <h1>Job Application Helper</h1>
+            <h1>URL Email Extraction</h1>
             {isLoading && (
                 <div>
                     <LoadingSpinner />
