@@ -17,7 +17,7 @@ function ApplyExcel(){
 
     useEffect(() => {
         if (data) {
-            navigate('/confirmation', {
+            navigate('/email-login', {
             state: {
                 data: data // Use the updated `data` state
             }
@@ -59,7 +59,9 @@ function ApplyExcel(){
             setData(res.data.data);
         } catch (error) {
             console.error(error);
+            alert("Server error, try again");
             setData(null);
+            setIsLoading(false);
         }
     };
 

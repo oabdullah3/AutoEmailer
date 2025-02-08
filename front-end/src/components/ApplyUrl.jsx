@@ -17,7 +17,7 @@ function ApplyUrl(){
 
     useEffect(() => {
         if (data) {
-          navigate('/confirmation', {
+          navigate('/email-login', {
             state: {
               data: data // Use the updated `data` state
             }
@@ -41,7 +41,9 @@ function ApplyUrl(){
             setData(res.data.data);
         } catch (error) {
             console.error(error);
+            alert("Server error, try again");
             setData(null);
+            setIsLoading(false);
         } 
         // finally {
         //     setIsLoading(false);

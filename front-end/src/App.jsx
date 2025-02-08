@@ -4,9 +4,11 @@ import './App.css'
 import HomePage from './components/HomePage';
 import ApplyUrl from './components/ApplyUrl';
 import ApplyExcel from './components/ApplyExcel.JSX';
-import ConfirmationPage from './components/ConfirmationPage';
-import Layout from './components/Layout';
+// import ConfirmationPage from './components/ConfirmationPage';
+// import Layout from './components/Layout';
 import NotFound from './components/NotFound';
+import EmailLogin from './components/EmailLogin';
+import SendGmail from './components/SendGmail';
 
 
 const routes = [{
@@ -21,8 +23,11 @@ const routes = [{
     path: '/apply-excel',
     element: <ApplyExcel />,
   },{
-    path: '/confirmation',
-    element: <ConfirmationPage />,
+    path: 'send-gmail',
+    element: <SendGmail />,
+  },{
+    path: '/email-login',
+    element: <EmailLogin />,
   }]
 }]
 

@@ -68,7 +68,7 @@ export const generateEmail = async (details) => {
     {name}
     `;
 
-    const prompt = `Here is a sample email template: ${emailTemplate}. Please use the details provided about me to create a similar email without including placeholders for names, job positions, or company names. If any information is missing, do not add it to the email. The user's institution name is ${details.institutionName}, the user's name is ${details.personName}, the user's major is ${details.major}, the user's skills include ${details.details}, and the relevant experience is ${details.relevantExperience}. Provide an json object containing two keys: subject and emailContent, formatted like this: { subject: 'subject', emailContent: 'emailContent' }.. Thank you!`;
+    const prompt = `Here is a sample email template: ${emailTemplate}. Please use the details provided about me to create a similar email without including placeholders for names, job positions, or company names. If any information is missing, do not add it to the email. The user's institution name is ${details.institutionName}, the user's name is ${details.personName}, the user's major is ${details.major}, the user's skills include ${details.details}, and the relevant experience is ${details.relevantExperience}. Think of a relevant subject for email. Provide an json object containing two keys: subject and emailContent, formatted like this: { subject: 'subject', emailContent: 'emailContent' }.. Thank you!`;
 
     const emailtosend = await chatBot(prompt);
     console.log(emailtosend);

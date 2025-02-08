@@ -89,7 +89,7 @@ app.post('/api/excel-data', upload.single('file'), async (req, res) => {
         
         console.log("CHAT DATA", chatData);
         let extractedEmails = await extractEmail(chatData.content || '');
-        const emailsToRemove = ['name@domain.com', 'mahadjawed4@gmail.com'];
+        const emailsToRemove = ['name@domain.com'];
         extractedEmails = [...new Set(extractedEmails)];
         extractedEmails = extractedEmails.filter(email => !emailsToRemove.includes(email));
         console.log("EXTRACTED EMAIL", extractedEmails);

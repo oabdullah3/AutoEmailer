@@ -1,20 +1,18 @@
-import { useLocation} from 'react-router-dom';
 import './ConfirmationPage.css'; // Ensure to import your CSS file
 import { useState } from 'react';
 
-function ConfirmationPage() {
+function ConfirmationPage({addresses, content, sub, sendEmail}) {
 
-    const location = useLocation();
-    const [subject, setSubject] = useState(location.state?.data.emailText.subject || {});
-    const [emailContent, setEmailContent] = useState(location.state?.data.emailText.emailContent || {});
-    const [emails, setEmails] = useState(location.state?.data.extractedEmails || []);
+    const [subject, setSubject] = useState(sub);
+    const [emailContent, setEmailContent] = useState(content);
+    const [emails, setEmails] = useState(addresses);
     const [newEmail, setNewEmail] = useState("");
 
     // Handle adding a new email
     const handleAddEmail = () => {
         if (newEmail.trim() && !emails.includes(newEmail)) {
-        setEmails([...emails, newEmail.trim()]);
-        setNewEmail("");
+            setEmails([...emails, newEmail.trim()]);
+            setNewEmail("");
         }
     };
 
@@ -29,8 +27,6 @@ function ConfirmationPage() {
         setEmails(updatedEmails);
     };
 
-
-
     const handleSubmit = (e) => {
         e.preventDefault();
         const userConfirmed = confirm("Are the email addresses and email content correct?");
@@ -38,9 +34,7 @@ function ConfirmationPage() {
             e.preventDefault(); // Cancels the submit operation
             alert("Form submission canceled!"); // Optional: Notify the user
         }else{
-            console.log("Updated Emails Array:", emails);
-            console.log("Updated Subject:", subject);
-            console.log("Updated Email Content:", emailContent);
+            sendEmail(emails, emailContent, subject);
         }
     };
 
@@ -99,7 +93,7 @@ function ConfirmationPage() {
                             </button>
                         </li>
                     </ul>
-                    <button type="submit">Submit Updated Details</button>
+                    <button type="submit">Send Email</button>
                 </form>
             </div>
         </div>
