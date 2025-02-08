@@ -72,6 +72,10 @@ export const generateEmail = async (details) => {
 
     const emailtosend = await chatBot(prompt);
     console.log(emailtosend);
-    const cleanedText = emailtosend.content.replace(/<think>.*?<\/think>/s, '').trim();
-    return cleanedText;
+    let cleanedText0 = emailtosend.content.replace(/<think>.*?<\/think>/s, '').trim();
+    let cleanedText1 = cleanedText0.replace("```json", '').trim();
+    let cleanedText2 = cleanedText1.replace("```", '').trim();
+    console.log(cleanedText2);
+
+    return cleanedText2
 }

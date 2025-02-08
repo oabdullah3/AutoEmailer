@@ -1,40 +1,107 @@
-import { useLocation } from 'react-router-dom';
+import { useLocation} from 'react-router-dom';
 import './ConfirmationPage.css'; // Ensure to import your CSS file
+import { useState } from 'react';
 
 function ConfirmationPage() {
 
-    const handleonclick = (e) => {
-        e.preventDefault();
-        console.log('Redirecting to Google Auth...');
-        console.log('Redirecting to Google Auth...');
-        window.location.href = 'http://localhost:8000/auth/google/callback';
+    const location = useLocation();
+    const [subject, setSubject] = useState(location.state?.data.emailText.subject || {});
+    const [emailContent, setEmailContent] = useState(location.state?.data.emailText.emailContent || {});
+    const [emails, setEmails] = useState(location.state?.data.extractedEmails || []);
+    const [newEmail, setNewEmail] = useState("");
+
+    // Handle adding a new email
+    const handleAddEmail = () => {
+        if (newEmail.trim() && !emails.includes(newEmail)) {
+        setEmails([...emails, newEmail.trim()]);
+        setNewEmail("");
+        }
+    };
+
+    // Handle removing an email
+    const handleRemoveEmail = (index) => {
+        setEmails(emails.filter((_, i) => i !== index));
+    };
+
+    // Handle editing an email
+    const handleEditEmail = (index, updatedEmail) => {
+        const updatedEmails = emails.map((email, i) => (i === index ? updatedEmail : email));
+        setEmails(updatedEmails);
     };
 
 
-    const location = useLocation();
-    const { subject, emailContent } = location.state?.data.emailText || {};
-    const extractedEmails = location.state?.data.extractedEmails || [];
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        const userConfirmed = confirm("Are the email addresses and email content correct?");
+        if (!userConfirmed) {
+            e.preventDefault(); // Cancels the submit operation
+            alert("Form submission canceled!"); // Optional: Notify the user
+        }else{
+            console.log("Updated Emails Array:", emails);
+            console.log("Updated Subject:", subject);
+            console.log("Updated Email Content:", emailContent);
+        }
+    };
 
     return (
         <div className="confirmation-container">
             <h1 className="confirmation-title">Confirmation Page</h1>
-            <div className="email-details">
-                <h2 className="email-heading">Subject:</h2>
-                <p className="email-subject">{subject || "No Subject"}</p>
-                <h2 className="email-heading">Email Content:</h2>
-                <p className="email-content">{emailContent || "No Content Available"}</p>
-            </div>
-            {extractedEmails.length > 0 && (
-                <div className="email-list">
-                    <h3>Extracted Emails:</h3>
-                    <ul>
-                        {extractedEmails.map((email) => (
-                            <li key={email}>{email}</li>
+            <div>
+                <form onSubmit={handleSubmit}>
+                    <label><h2 className="email-heading">Subject:</h2></label>
+                    <textarea
+                        className="email-subject"
+                        value={subject}
+                        onChange={(e) => setSubject(e.target.value)}
+                        required
+                    />
+                    <label><h2 className="email-heading">Email Content:</h2></label>
+                    <textarea
+                        className="email-content"
+                        value={emailContent}
+                        onChange={(e) => setEmailContent(e.target.value)}
+                        required
+                    />
+                    <label><h2 className="email-heading">Recepient Email Addresses:</h2></label>
+                    <ul className="emails">
+                        {emails.map((email, index) => (
+                            <li key={index} className="email">
+                            <input
+                                type="text"
+                                value={email}
+                                onChange={(e) => handleEditEmail(index, e.target.value)}
+                                className="email-input"
+                            />
+                            <button
+                                type="button"
+                                onClick={() => handleRemoveEmail(index)}
+                                className="remove-button"
+                            > 
+                                Remove 
+                            </button>
+                            </li>
                         ))}
+                        <li key="add" className="email">
+                            <input
+                                type="text"
+                                placeholder="Add new email"
+                                value={newEmail}
+                                onChange={(e) => setNewEmail(e.target.value)}
+                                className="email-input"
+                            />
+                            <button
+                                type="button"
+                                onClick={handleAddEmail}
+                                className="add-button"
+                            >
+                                Add
+                            </button>
+                        </li>
                     </ul>
-                </div>
-            )}
-            <button onClick={handleonclick}>submit</button>
+                    <button type="submit">Submit Updated Details</button>
+                </form>
+            </div>
         </div>
     );
 }
