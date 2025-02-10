@@ -3,6 +3,7 @@ import axios from 'axios';
 import {useNavigate} from 'react-router-dom';
 import LoadingSpinner from './LoadingSpinner';
 
+
 function ApplyUrl(){
     const [url, setUrl] = useState('');
     const [institutionName, setInstitutionName] = useState('');

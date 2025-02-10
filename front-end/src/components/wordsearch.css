@@ -1,0 +1,30 @@
+.word-search-container {
+    text-align: center;
+    margin: 20px;
+  }
+  
+  .grid {
+    display: inline-block;
+  }
+  
+  .grid-row {
+    display: flex;
+  }
+  
+  .grid-cell {
+    width: 30px;
+    height: 30px;
+    border: 1px solid #ccc;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.5em;
+  }
+  
+  .word-list {
+    margin-top: 20px;
+    text-align: left;
+  }
+  .loading-text{
+    color: white;
+  }
